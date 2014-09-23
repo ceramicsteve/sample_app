@@ -6,6 +6,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
+      sign_in @user #creates the sign in page
       flash[:success] = "Welcome to the Sample App!"
      redirect_to @user #Sucess redirects to user page
     else
@@ -14,7 +15,9 @@ class UsersController < ApplicationController
   end
 
   def new
+
     @user = User.new
+
   end
 
   private #private code?

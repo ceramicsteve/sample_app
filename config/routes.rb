@@ -1,7 +1,17 @@
 SampleApp::Application.routes.draw do
-  resources :users #give all resources needed to create users model
+  resources :users
+  #give all resources needed to create users model
+  resources :sessions, only: [:new , :create , :destroy ]
+  #Sessions controller will only do three things
+  #relogin create session
+  #login first time new session
+  #logout destroy current seesion
+
   root 'static_pages#home'
   match '/signup', to: 'users#new', via: 'get'
+  match '/signin', to: 'sessions#new', via: 'get'
+  match '/signout', to: 'sessions#destroy', via: 'delete'
+  #Uses HTTP Delete request
   match '/help', to: 'static_pages#help', via: 'get'
   match '/about', to: 'static_pages#about', via: 'get'
   match '/contact', to: 'static_pages#contact', via: 'get'
