@@ -1,14 +1,19 @@
 class UsersController < ApplicationController
-before_action :sign_in_user, only: [:index, :edit, :update, :destroy]
+before_action :signed_in_user, only: [:index, :edit, :update, :destroy]
 before_action :correct_user, only: [:edit, :update]
 before_action :admin_user, only: :destroy
 #before_action is filter before a call to this controller is used
 
   def destroy
-    user.find(params(:id)).destroy
-    flash[:sucess] = "User deleted"
-    redirect_to users_url
+    if User.find(params[:id]).admin?
+      redirect_to users_url
+    else
+      User.find(params[:id]).delete
+      flash[:sucess] = "User deleted"
+      redirect_to users_url
+      end
   end
+
   def index
 
     @users = User.paginate(page: params[:page])
@@ -18,6 +23,7 @@ before_action :admin_user, only: :destroy
 
   def show
     @user = User.find(params[:id]) #creates @user with find parameter of :id
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
 
   def create
@@ -58,23 +64,21 @@ before_action :admin_user, only: :destroy
 
 
   private
+  # The difference between “protected” and “private” is fairly subtle and is different in Ruby
+  # than in most common OO languages. If a method is protected, it may be called by any instance
+  # of the defining class or its subclasses. If a method is private, it may be called only within
+  # the context of the calling object—it is never possible to access another object’s private methods directly,
+  # even if the object is of the same class as the caller.
+
 
   def user_params
 
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
-    #instead of using :user which allowed for entire hash of User, we restrict what :user allows to pass on with method user_params
+    # instead of using :user which allowed for entire hash of User, we restrict what :user
+    # allows to pass on with method user_params
 
   end
 # Before Filters
-
-  def sign_in_user
-
-    unless signed_in?
-      store_location
-      redirect_to signin_url, notice: "Please sign in."
-    end
-    #were did signed_in? comform and what's this syntax
-  end
 
   def correct_user
     @user = User.find(params[:id])

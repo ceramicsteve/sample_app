@@ -7,6 +7,8 @@ SampleApp::Application.routes.draw do
   #login first time new session
   #logout destroy current seesion
 
+  resources :microposts, only: [:create, :destroy]
+
   root 'static_pages#home'
   match '/signup', to: 'users#new', via: 'get'
   match '/signin', to: 'sessions#new', via: 'get'

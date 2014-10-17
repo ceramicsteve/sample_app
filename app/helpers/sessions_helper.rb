@@ -15,8 +15,9 @@ def signed_in?
 end
 
  def current_user=(user)
-   #the fuck this defines self.current_user
-   @current_user = user
+# defines current_user= to be able to update the value of user the variable is current_user=
+# attr_accessor declaration could be used
+  @current_user = user
 end
 
 def current_user
@@ -49,6 +50,13 @@ end
 
   def store_location
     session[:return_to] = request.url if request.get?
+  end
+
+  def signed_in_user
+    unless signed_in?
+      store_location
+      redirect_to signin_url, notice: "Please sign in."
+    end
   end
 
 end

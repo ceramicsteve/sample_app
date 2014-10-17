@@ -11,6 +11,13 @@ FactoryGirl.define do
 factory :admin do
   admin true
 
-     end
+end
+
+  end
+
+  factory :micropost do
+
+    content "Free Kevin"
+    user
   end
 end

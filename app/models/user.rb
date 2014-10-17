@@ -1,4 +1,7 @@
 class User < ActiveRecord::Base
+
+  has_many :microposts, dependent: :destroy
+
   before_save { email.downcase! }
   #lowercase email address before save, with the bang it is changing the email symbol database directly
   before_create :create_remember_token
@@ -24,6 +27,10 @@ class User < ActiveRecord::Base
   def User.digest(token)
     Digest::SHA1.hexdigest(token.to_s)
     #Hashes token with SHA1 converts token to string
+  end
+
+  def feed
+  Micropost.where("user_id = ?", id)
   end
 
   private

@@ -60,6 +60,8 @@ describe "AuthenticationPages" do
       end
     end
 
+
+
     describe "for non-signed-in users" do
       let(:user) {FactoryGirl.create(:user)}
 
@@ -78,6 +80,7 @@ describe "AuthenticationPages" do
           end
         end
       end
+
 #Authorization for non sign in users in the User controller
 
       describe "in the User controller" do
@@ -99,6 +102,18 @@ describe "AuthenticationPages" do
         end
 
       end
+
+      describe "in the micropost controller" do
+        describe "submitting to the create action" do
+          before { post microposts_path }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end
     end
 
 #
@@ -117,9 +132,14 @@ describe "AuthenticationPages" do
         before { patch user_path(wrong_user)}
         specify { expect(response).to redirect_to(root_url)}
       end
+
+
+
+
+
+
+
     end
   end
-
-
 end
 

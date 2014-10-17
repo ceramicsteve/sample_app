@@ -61,7 +61,7 @@ describe "User pages" do
         fill_in "Name",                 with: "Example User"
         fill_in "Email",                with: "user@example.com"
         fill_in "Password",             with: "foobar"
-        fill_in "Confirmation",         with: "foobar"
+        fill_in "Confirm Password",         with: "foobar"
         end
       it "should create a user" do
         expect { click_button submit }.to change(User, :count).by(1)
@@ -88,11 +88,24 @@ describe "User pages" do
 
     end
 
+    describe "forbidden attributes" do
+      let(:params) do
+        { user: { admin: true, password: user.password,
+                  password_confirmation: user.password } }
+      end
+
+      before do
+        valid_signin user, no_capybara: true
+        patch user_path(user), params
+      end
+      specify { expect(user.reload).not_to be_admin }
+    end
+
     describe "page" do
 
       it { should have_content("Update your profile") }
       it { should have_title("Edit user") }
-      it { should have_link('change', href: 'http://gravatar.com/emails') }
+      it { should have_link('Change', href: 'http://gravatar.com/emails') }
     end
 
     describe "with invalid information" do
@@ -128,8 +141,9 @@ describe "User pages" do
   describe "index" do
     before do
       valid_signin FactoryGirl.create(:user)
-      FactoryGirl.create(:user, name: "Bob", email: "bob@example.com")
-      FactoryGirl.create(:user, name: "Ben", email: "ben@example.com")
+      FactoryGirl.create(:user, name: "Bob", email: "bob@example.com", admin: true)
+      FactoryGirl.create(:user, name: "Ben", email: "ben@example.com", admin: true)
+      FactoryGirl.create(:user, name: "Admin", email: "admin@example.com", admin: true)
       visit users_path
     end
 
@@ -144,6 +158,28 @@ describe "User pages" do
       it { should have_selector('div.pagination') }
     end
 
+    describe "delete links" do
+      it { should_not have_link('delete')}
+
+      describe "as an admin user" do
+        let(:admin) {FactoryGirl.create(:admin) }
+        before do
+          valid_signin admin
+          visit users_path
+        end
+
+        it { should have_link('delete', href: user_path(User.first))}
+        it "should be able to delete another user" do
+          expect do
+            click_link('delete', match: :first)
+          end.to change(User, :count).by(-1)
+
+        end
+        it { should_not have_link('delete', href: user_path(admin))}
+        end
+      end
+    end
+
     it "should list each user" do
 
       User.all.each do |user|
@@ -151,7 +187,26 @@ describe "User pages" do
 
       end
     end
+
+  describe "profile page" do
+    let(:user) { FactoryGirl.create(:user) }
+    let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
+    before { visit user_path(user) }
+
+    it { should have_content(user.name) }
+    it { should have_title(user.name) }
+
+    describe "microposts" do
+      it { should have_content(m1.content) }
+      it { should have_content(m2.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
 
-end
+
+  end
+
+
 
